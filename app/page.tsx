@@ -62,20 +62,33 @@ export default function Home() {
     let cancelled = false
     async function load() {
       try {
-        const [g, m, s, d, st] = await Promise.all([
-          api.groups(),
-          api.matches(),
-          api.topScorers(8),
-          api.discipline(6),
-          api.stadiums(),
-        ])
-        if (cancelled) return
-        setGroups(g.groups)
-        setMatches(m.matches)
-        setScorers(s.top_scorers)
-        setDiscipline(d.discipline)
-        setStadiums(st.stadiums)
-        setApiDown(false)
+     const [g, m, st] = await Promise.all([
+  api.groups(),
+  api.matches(),
+  api.stadiums(),
+])
+
+if (cancelled) return
+
+setGroups(g.groups)
+setMatches(m.matches)
+setStadiums(st.stadiums)
+
+try {
+  const s = await api.topScorers(8)
+  if (!cancelled) setScorers(s.top_scorers)
+} catch {
+  if (!cancelled) setScorers([])
+}
+
+try {
+  const d = await api.discipline(6)
+  if (!cancelled) setDiscipline(d.discipline)
+} catch {
+  if (!cancelled) setDiscipline([])
+}
+
+setApiDown(false)
       } catch {
         if (!cancelled) setApiDown(true)
       } finally {
